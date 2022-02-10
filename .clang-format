@@ -1,0 +1,10 @@
+---
+Language: Cpp
+UseTab: Always
+IndentWidth: 4
+TabWidth : 4
+BreakBeforeBraces: Attach
+AllowShortIfStatementsOnASingleLine: true
+IndentCaseLabels: false
+ColumnLimit: 0
+PointerAlignment: Left
