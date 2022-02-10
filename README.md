@@ -9,4 +9,6 @@ Ex. the flow is:
 * Find the concave hull of that planar data
 * Construct a prism filter based on the hull
 
-The prism project was for trying to investigate a bug where the prism didn't work as expected with complex polygons. So far, it behaves ok.
+I have investigate a bug, found it and fixed it. The bug was the prism didn't catch correctly the points in and out of the prism when the prism was made of a multi-polygon with holes.
+
+That happened because the algorithm used to determine if a point is in a polygon, didn't take in account that the hull could be of multiple polygons, and checked also against edges linking between the polygons, that didn't exist in the polygons themselves.

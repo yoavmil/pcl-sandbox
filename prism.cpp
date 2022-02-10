@@ -1,8 +1,8 @@
 #include "prism.h"
 
 int main(void) {
-	 auto cloud = createRing(0.25f, 0.5f);
-	// auto cloud = createTwoParts();
+	// auto cloud = createRing(0.25f, 0.5f);
+	auto cloud = createTwoParts();
 	filterPrism(cloud);
 
 	return 0;
@@ -42,7 +42,7 @@ Cloud::Ptr createRing(float rMin, float rMax) {
 }
 
 Cloud::Ptr createTwoParts() {
-	Cloud::Ptr disk = createRing(0, 0.2f);
+	Cloud::Ptr disk = createRing(0.1, 0.25f);
 	Cloud::Ptr cloud(new Cloud);
 	for (auto& point : disk->points) {
 		auto left = point;
@@ -101,13 +101,23 @@ void filterPrism(Cloud::Ptr cloud) {
 	fmt::print("finding the concave hull\n");
 	Cloud::Ptr hullCloud(new Cloud);
 	vector<pcl::Vertices> polygons;
+    
 	pcl::ConcaveHull<PointT> concaveHull;
 	{
 		concaveHull.setIndices(planeInliers);
 		concaveHull.setInputCloud(cloud);
-		concaveHull.setAlpha(0.1);
+		concaveHull.setAlpha(0.05);
 		concaveHull.reconstruct(*hullCloud, polygons);
 		fmt::print("\tconcave hull has {} points, and {} vectors\n", hullCloud->size(), polygons.size());
+		if (false) { // print polygons XY
+			for (auto& poly : polygons) {
+				for (size_t i = 0; i < poly.vertices.size(); i++) {
+					size_t ii = poly.vertices[i];
+					auto& xyz = hullCloud->points[ii];
+					fmt::print("{},{}\n", xyz.x, xyz.y);
+				}
+			}
+		}
 	}
 
 	fmt::print("filtering about ring prism\n");
@@ -117,7 +127,8 @@ void filterPrism(Cloud::Ptr cloud) {
 		pp.setInputCloud(cloud);
 		pp.setInputPlanarHull(hullCloud);
 		pp.setHeightLimits(-1, 1);
-		pp.segment(*pointsInsidePolygons);
+		// pp.segment(*pointsInsidePolygons); before fix
+        pp.segment(*pointsInsidePolygons, polygons);
 
 		fmt::print("\tprism has {} points\n", pointsInsidePolygons->indices.size());
 	}
